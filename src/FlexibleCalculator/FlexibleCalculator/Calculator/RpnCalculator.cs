@@ -1,44 +1,45 @@
 ﻿using FlexibleCalculator.Operations;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace FlexibleCalculator.Calculator
 {
     public class RpnCalculator : ICalculator
     {
         private readonly ReversePolishNotationAlgo _reversePolishNotationAlgo;
-        private readonly IOperation[] _operations;
-
+   
         public RpnCalculator(IOperation[] operations)
         {
             _reversePolishNotationAlgo = new ReversePolishNotationAlgo(operations);
-            _operations = operations;
         }
 
         public double Calculate(string input)
         {
             var tokens = _reversePolishNotationAlgo.GetTokens(input);
 
-            var stack = new Stack<string>(input.Length);
+            var stack = new Stack<Token>(input.Length);
 
             foreach (var token in tokens)
             {
-                if (char.IsDigit(token[0]))
+                if (token.TokenType == TokenType.Number)
                 {
                     stack.Push(token);
 
                     continue;
                 }
 
-                var operation = _operations.First(_ => _.GetOperation() == token);
+                var operation = token.Operation;
 
-                var y = double.Parse(stack.Pop());
-                var x = double.Parse(stack.Pop());
+                var y = stack.Pop().Number.Value;
+                var x = stack.Pop().Number.Value;
 
-                stack.Push(operation.Execute(x, y).ToString());
+                stack.Push(new Token
+                {
+                    TokenType = TokenType.Number,
+                    Number = operation.Execute(x, y)
+                });
             }
 
-            return double.Parse(stack.Peek());
+            return stack.Peek().Number.Value;
         }
     }
 }

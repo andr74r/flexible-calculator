@@ -14,16 +14,22 @@ namespace FlexibleCalculator.Calculator
                 .ToDictionary(x => x.GetOperation(), x => x);
         }
 
-        public string[] GetTokens(string input)
+        public Token[] GetTokens(string input)
         {
-            var outputQueue = new Queue<string>(input.Length);
+            var outputQueue = new Queue<Token>(input.Length);
             var operatorStack = new Stack<string>(input.Length);
 
             foreach (var symbol in input.Select(x => x.ToString()))
             {
                 if (char.IsDigit(symbol[0]))
                 {
-                    outputQueue.Enqueue(symbol);
+                    var number = double.Parse(symbol);
+
+                    outputQueue.Enqueue(new Token
+                    {
+                        TokenType = TokenType.Number,
+                        Number = number
+                    });
                     continue;
                 }
 
@@ -35,7 +41,11 @@ namespace FlexibleCalculator.Calculator
                         && _operations.ContainsKey(operatorStack.Peek()) 
                         && _operations[operatorStack.Peek()].GetPriority() >= currentOperation.GetPriority())
                     {
-                        outputQueue.Enqueue(operatorStack.Pop());
+                        outputQueue.Enqueue(new Token
+                        {
+                            TokenType = TokenType.Operation,
+                            Operation = _operations[operatorStack.Pop()]
+                        });
                     }
 
                     operatorStack.Push(currentOperation.GetOperation());
@@ -53,7 +63,11 @@ namespace FlexibleCalculator.Calculator
                 {
                     while(operatorStack.Peek() != "(")
                     {
-                        outputQueue.Enqueue(operatorStack.Pop());
+                        outputQueue.Enqueue(new Token
+                        {
+                            TokenType = TokenType.Operation,
+                            Operation = _operations[operatorStack.Pop()]
+                        });
                     }
 
                     operatorStack.Pop();
@@ -65,7 +79,11 @@ namespace FlexibleCalculator.Calculator
 
             while(operatorStack.Count != 0)
             {
-                outputQueue.Enqueue(operatorStack.Pop());
+                outputQueue.Enqueue(new Token
+                {
+                    TokenType = TokenType.Operation,
+                    Operation = _operations[operatorStack.Pop()]
+                });
             }
 
             return outputQueue.ToArray();
