@@ -2,7 +2,7 @@
 
 namespace FlexibleCalculator.Calculator
 {
-    internal class Token
+    public class Token
     {
         public TokenType TokenType { get; set; }
 

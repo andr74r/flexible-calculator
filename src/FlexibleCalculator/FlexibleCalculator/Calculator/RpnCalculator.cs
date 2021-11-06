@@ -5,16 +5,20 @@ namespace FlexibleCalculator.Calculator
 {
     public class RpnCalculator : ICalculator
     {
-        private readonly ReversePolishNotationAlgo _reversePolishNotationAlgo;
+        private readonly IReversePolishNotationAlgo _reversePolishNotationAlgo;
+        private readonly ITokenParser _tokenParser;
    
-        public RpnCalculator(IOperation[] operations)
+        public RpnCalculator(
+            IReversePolishNotationAlgo reversePolishNotationAlgo, 
+            ITokenParser tokenParser)
         {
-            _reversePolishNotationAlgo = new ReversePolishNotationAlgo(operations);
+            _reversePolishNotationAlgo = reversePolishNotationAlgo;
+            _tokenParser = tokenParser;
         }
 
         public double Calculate(string input)
         {
-            var tokens = _reversePolishNotationAlgo.GetTokens(input);
+            var tokens = _reversePolishNotationAlgo.OrderTokens(_tokenParser.Parse(input));
 
             var stack = new Stack<Token>(input.Length);
 

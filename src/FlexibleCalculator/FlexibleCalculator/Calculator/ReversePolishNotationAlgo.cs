@@ -1,10 +1,12 @@
-﻿using FlexibleCalculator.Operations;
+﻿using FlexibleCalculator.Exceptions;
+using FlexibleCalculator.Helpers;
+using FlexibleCalculator.Operations;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace FlexibleCalculator.Calculator
 {
-    internal class ReversePolishNotationAlgo
+    internal class ReversePolishNotationAlgo : IReversePolishNotationAlgo
     {
         private readonly Dictionary<string, IOperation> _operations;
 
@@ -14,16 +16,16 @@ namespace FlexibleCalculator.Calculator
                 .ToDictionary(x => x.GetOperation(), x => x);
         }
 
-        public Token[] GetTokens(string input)
+        public Token[] OrderTokens(IEnumerable<string> tokens)
         {
-            var outputQueue = new Queue<Token>(input.Length);
-            var operatorStack = new Stack<string>(input.Length);
+            var outputQueue = new Queue<Token>();
+            var operatorStack = new Stack<string>();
 
-            foreach (var symbol in input.Select(x => x.ToString()))
+            foreach (var token in tokens)
             {
-                if (char.IsDigit(symbol[0]))
+                if (char.IsDigit(token[0]))
                 {
-                    var number = double.Parse(symbol);
+                    var number = DoubleParser.ParseAndIgnoreCalture(token);
 
                     outputQueue.Enqueue(new Token
                     {
@@ -33,9 +35,9 @@ namespace FlexibleCalculator.Calculator
                     continue;
                 }
 
-                if (_operations.ContainsKey(symbol))
+                if (_operations.ContainsKey(token))
                 {
-                    var currentOperation = _operations[symbol];
+                    var currentOperation = _operations[token];
 
                     while (operatorStack.Count > 0 
                         && _operations.ContainsKey(operatorStack.Peek()) 
@@ -53,13 +55,13 @@ namespace FlexibleCalculator.Calculator
                     continue;
                 }
 
-                if (symbol == "(")
+                if (token == "(")
                 {
-                    operatorStack.Push(symbol);
+                    operatorStack.Push(token);
                     continue;
                 }
 
-                if (symbol == ")")
+                if (token == ")")
                 {
                     while(operatorStack.Peek() != "(")
                     {
@@ -74,7 +76,7 @@ namespace FlexibleCalculator.Calculator
                     continue;
                 }
 
-                throw new System.ArgumentException("Unexpected character");
+                throw new UnexpectedCharacterException("Unexpected character");
             }
 
             while(operatorStack.Count != 0)
