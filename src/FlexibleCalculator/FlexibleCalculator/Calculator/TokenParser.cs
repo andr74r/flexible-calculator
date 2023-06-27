@@ -11,11 +11,9 @@ namespace FlexibleCalculator.Calculator
         public IEnumerable<string> Parse(string input)
         {
             var currentToken = string.Empty;
-            int index = 0;
 
             foreach (var symbol in input.Where(x => !char.IsWhiteSpace(x)))
             {
-                index++;
                 if (char.IsLetterOrDigit(symbol) || symbol.IsDecimalSeparator())
                 {
                     currentToken += symbol;
